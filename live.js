@@ -16,6 +16,47 @@
   "use strict";
 
   var API = "https://gen.pollinations.ai";
+  var MEDIA = "https://media.pollinations.ai";
+  var REF_MODEL = "black-forest-labs/flux.2-klein-4b"; // free-tier image model that takes up to 10 reference images
+  var MAX_REFS = 4;
+  var refs = [];          // File objects the user added
+  var refUrls = new Map(); // File -> uploaded public URL (cache)
+
+  /* ---------- References: collect files (picker or drop), upload on Generate ---------- */
+  function setRefs(list) {
+    refs = Array.prototype.slice.call(list || []).slice(0, MAX_REFS);
+    var sub = document.getElementById("drop-sub");
+    if (!sub || !refs.length) return;
+    var imgs = refs.filter(isImg).length;
+    sub.textContent = refs.length + (refs.length === 1 ? " reference" : " references") + " added" +
+      (imgs < refs.length ? " · only images are used for now" : "") + " · tap to change";
+  }
+  function isImg(f) { return f && f.type && f.type.indexOf("image/") === 0; }
+  function wireRefs() {
+    var input = document.getElementById("file"), drop = document.getElementById("drop");
+    if (!input || !drop) return;
+    input.multiple = true;
+    input.setAttribute("accept", "image/*,video/*,audio/*");
+    // run after the page's own thumbnail handler
+    input.addEventListener("change", function () { setTimeout(function () { setRefs(input.files); }, 0); });
+    drop.addEventListener("drop", function (e) {
+      if (e.dataTransfer && e.dataTransfer.files.length) setTimeout(function () { setRefs(e.dataTransfer.files); }, 0);
+    });
+  }
+  function uploadRef(f) {
+    if (refUrls.has(f)) return Promise.resolve(refUrls.get(f));
+    var fd = new FormData(); fd.append("file", f, f.name || "reference");
+    return fetch(MEDIA + "/upload?safe=privacy", { method: "POST", headers: { Authorization: "Bearer " + key }, body: fd })
+      .then(function (r) { if (!r.ok) return errorFrom(r); return r.json(); })
+      .then(function (j) {
+        var url = j.url || (MEDIA + "/" + j.id);
+        refUrls.set(f, url); return url;
+      });
+  }
+  function uploadImageRefs() {
+    var imgs = refs.filter(isImg);
+    return Promise.all(imgs.map(uploadRef));
+  }
 
   // Psycho Bug model names -> real Pollinations models (cheapest that fit).
   var MAP = {
@@ -89,6 +130,7 @@
     // The component may restore a key from sessionStorage after load.
     setTimeout(sync, 800);
     sync();
+    wireRefs();
   }
 
   /* ---------- API helpers ---------- */
@@ -108,10 +150,12 @@
     });
   }
 
-  function genImage(model, text, aspect) {
+  function genImage(model, text, aspect, refList) {
     var s = SIZES[aspect] || SIZES["16:9"];
+    if (refList && refList.length) model = REF_MODEL;
     var url = API + "/image/" + encodeURIComponent(text) +
-      "?model=" + encodeURIComponent(model) + "&width=" + s[0] + "&height=" + s[1] + "&nologo=true";
+      "?model=" + encodeURIComponent(model) + "&width=" + s[0] + "&height=" + s[1] + "&nologo=true" +
+      (refList && refList.length ? "&image=" + encodeURIComponent(refList.join("|")) : "");
     return fetch(url, { headers: authHeaders() }).then(function (r) {
       if (!r.ok) return errorFrom(r);
       return r.blob();
@@ -120,10 +164,11 @@
 
   function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
 
-  function genVideo(model, text, aspect, seconds, sound, onTick) {
+  function genVideo(model, text, aspect, seconds, sound, onTick, refList) {
     var url = API + "/video/" + encodeURIComponent(text) +
       "?model=" + encodeURIComponent(model) + "&aspectRatio=" + encodeURIComponent(aspect === "21:9" ? "16:9" : aspect) +
-      "&duration=" + seconds + "&audio=" + (sound ? "true" : "false");
+      "&duration=" + seconds + "&audio=" + (sound ? "true" : "false") +
+      (refList && refList.length ? "&image=" + encodeURIComponent(refList[0]) : "");
     return fetch(url, { headers: authHeaders({ Prefer: "respond-async" }) }).then(function (r) {
       if (r.status === 200) return r.blob();
       if (r.status !== 202) return errorFrom(r);
@@ -268,14 +313,24 @@
     var label = modelSel.options[modelSel.selectedIndex].text.split(" — ")[0];
     var full = buildPrompt(text);
     var tags = [label, m.kind === "video" ? dur + "s" : "Image", aspect, presetName(), "Live"];
+    var nImg = refs.filter(isImg).length;
+    if (nImg) tags.push(nImg + (nImg === 1 ? " reference" : " references"));
     var el = card({ text: text, aspect: aspect, label: label, tags: tags });
 
     var tab = document.querySelector('[data-view="history"]'); if (tab) tab.click();
 
+    var hasRefs = nImg > 0;
+    var refsReady = hasRefs
+      ? (setLine(el, "Feeding your references to the swarm…", 15), uploadImageRefs())
+      : Promise.resolve([]);
+
     if (m.kind === "image") {
-      setLine(el, "Growing pixels…", 45);
-      genImage(m.model, full, aspect)
-        .then(function (b) { show(el, b, false, "Live · AI image", "psycho-bug.jpg"); })
+      refsReady
+        .then(function (urls) {
+          setLine(el, urls.length ? "Growing pixels from your references…" : "Growing pixels…", 45);
+          return genImage(m.model, full, aspect, urls);
+        })
+        .then(function (b) { show(el, b, false, hasRefs ? "Live · AI image · from your reference" : "Live · AI image", "psycho-bug.jpg"); })
         .catch(function (e) { fail(el, e); });
       return;
     }
@@ -283,12 +338,16 @@
     // Video: real video if the account can pay for it, else a real keyframe with motion.
     var seconds = Math.min(dur, 10);
     setLine(el, "Laying frames in the dark…", 25);
-    genVideo(m.model, full, aspect, seconds, sound, function (s) { setLine(el, "Rendering dread… " + s + "s", Math.min(90, 25 + s)); })
+    var urlsForVideo = [];
+    refsReady.then(function (urls) {
+      urlsForVideo = urls;
+      return genVideo(m.model, full, aspect, seconds, sound, function (s) { setLine(el, "Rendering dread… " + s + "s", Math.min(90, 25 + s)); }, urls);
+    })
       .then(function (b) { show(el, b, true, "Live · AI video", "psycho-bug.mp4"); })
       .catch(function (e) {
         if (e && (e.status === 402 || e.status === 403)) {
           setLine(el, "No paid Pollen for video — hatching a real keyframe instead…", 60);
-          return genImage(m.frame, full, aspect).then(function (b) {
+          return genImage(m.frame, full, aspect, urlsForVideo).then(function (b) {
             show(el, b, false, "Live · AI keyframe (video needs paid Pollen)", "psycho-bug-keyframe.jpg");
             var img = $(".x-result__media img", el);
             if (img) img.style.animation = "pbKen 12s ease-in-out infinite alternate";
