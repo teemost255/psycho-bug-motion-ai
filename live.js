@@ -205,8 +205,48 @@
     }
     media.appendChild(node);
     media.insertAdjacentHTML("beforeend", '<span class="x-badge">' + badge + "</span>");
+    wireDownload(el, blob, url, filename);
+  }
+
+  /* ---------- Download: direct save, plus Save to phone (share sheet) where supported ---------- */
+  function stamp() {
+    var d = new Date(), z = function (n) { return (n < 10 ? "0" : "") + n; };
+    return d.getFullYear() + z(d.getMonth() + 1) + z(d.getDate()) + "-" + z(d.getHours()) + z(d.getMinutes()) + z(d.getSeconds());
+  }
+  function extFor(blob, fallback) {
+    var t = (blob && blob.type) || "";
+    if (/png/.test(t)) return "png";
+    if (/webp/.test(t)) return "webp";
+    if (/jpe?g/.test(t)) return "jpg";
+    if (/mp4/.test(t)) return "mp4";
+    if (/webm/.test(t)) return "webm";
+    return fallback;
+  }
+  function wireDownload(el, blob, url, filename) {
+    var base = filename.replace(/\.[a-z0-9]+$/i, "");
+    var name = base + "-" + stamp() + "." + extFor(blob, filename.split(".").pop());
     var dl = $("[data-dl]", el);
-    dl.href = url; dl.download = filename; dl.removeAttribute("aria-disabled");
+    dl.href = url; dl.download = name; dl.removeAttribute("aria-disabled");
+    dl.setAttribute("role", "button"); dl.style.cursor = "pointer";
+    dl.addEventListener("click", function (ev) {
+      ev.preventDefault();
+      var a = document.createElement("a");
+      a.href = url; a.download = name; a.rel = "noopener";
+      document.body.appendChild(a); a.click(); a.remove();
+    });
+    var file = null;
+    try { file = new File([blob], name, { type: blob.type || "application/octet-stream" }); } catch (e) {}
+    if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
+      var sv = document.createElement("button");
+      sv.type = "button"; sv.className = "x-btn"; sv.textContent = "Save to phone";
+      sv.addEventListener("click", function () {
+        navigator.share({ files: [file], title: "Psycho Bug AI" }).catch(function () {});
+      });
+      dl.parentNode.insertBefore(sv, dl.nextSibling);
+    }
+    // Also let a tap on the result itself save it.
+    var media = $(".x-result__media", el), node = media && media.querySelector("img,video");
+    if (node) { node.title = "Tap Download to save"; }
   }
 
   function fail(el, err) {
