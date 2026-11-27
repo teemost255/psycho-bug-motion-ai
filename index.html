@@ -1,0 +1,864 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Psycho Bug AI — Cinema that crawls under your skin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400&family=Anton&display=swap"
+    />
+    <link rel="stylesheet" href="hark.css" />
+    <link rel="stylesheet" href="hark-hero.css" />
+    <style>
+      :root {
+        --x-bg: #0a0b0a;
+        --x-panel: #121412;
+        --x-panel-2: #181b18;
+        --x-line: rgba(255, 255, 255, 0.09);
+        --x-line-2: rgba(255, 255, 255, 0.16);
+        --x-text: #ecefe8;
+        --x-dim: #9aa096;
+        --x-lime: #c6ff00;
+        --x-red: #ff2d55;
+        --x-display: "Anton", "Impact", "Arial Narrow", sans-serif;
+      }
+      body { background: var(--x-bg); color: var(--x-text); }
+      .page { max-width: 1280px; padding-top: 0; gap: 0; }
+      .main { gap: 0; }
+      .x-display { font-family: var(--x-display); font-weight: 400; text-transform: uppercase; letter-spacing: 0.01em; line-height: 0.95; }
+      .x-lime { color: var(--x-lime); }
+      .x-red { color: var(--x-red); }
+      button { font: inherit; color: inherit; }
+      :focus-visible { outline-color: var(--x-lime); }
+
+      /* banner + nav */
+      .x-banner { margin-inline: calc(-1 * var(--gutter)); background: var(--x-red); color: #0a0b0a; text-align: center; font: var(--type-label); padding: 8px var(--gutter); letter-spacing: 0.04em; }
+      .x-banner b { font-family: var(--x-display); font-weight: 400; letter-spacing: 0.06em; }
+      .x-banner .x-count { font-family: "Geist Mono", monospace; background: #0a0b0a; color: #fff; border-radius: 6px; padding: 2px 8px; margin-left: 8px; white-space: nowrap; }
+      .x-nav { position: sticky; top: 0; z-index: 50; margin-inline: calc(-1 * var(--gutter)); padding: 10px var(--gutter); display: flex; align-items: center; gap: 20px; background: rgba(10, 11, 10, 0.82); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-bottom: 1px solid var(--x-line); }
+      .x-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; flex-shrink: 0; min-height: var(--tap); }
+      .x-brand img { width: 34px; height: 34px; object-fit: contain; }
+      .x-brand span { font-family: var(--x-display); font-size: 20px; letter-spacing: 0.04em; }
+      .x-links { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; flex: 1; }
+      .x-links::-webkit-scrollbar { display: none; }
+      .x-links a { text-decoration: none; color: var(--x-dim); font: var(--type-label); padding: 0 12px; min-height: var(--tap); display: inline-flex; align-items: center; border-radius: var(--r-pill); white-space: nowrap; }
+      .x-links a:hover { color: var(--x-text); background: var(--x-panel-2); }
+      .x-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: var(--tap); padding: 0 20px; border-radius: var(--r-pill); border: 1px solid var(--x-line-2); background: transparent; color: var(--x-text); font: var(--type-label); font-weight: 600; text-decoration: none; cursor: pointer; white-space: nowrap; transition: transform var(--dur-quick) var(--ease-out), background var(--dur-quick); }
+      .x-btn:hover { background: var(--x-panel-2); }
+      .x-btn--lime { background: var(--x-lime); color: #0a0b0a; border-color: var(--x-lime); }
+      .x-btn--lime:hover { background: #d6ff4d; transform: translateY(-1px); }
+      .x-btn[disabled] { opacity: 0.45; cursor: not-allowed; transform: none; }
+      .x-nav .x-btn { flex-shrink: 0; }
+      @media (max-width: 860px) { .x-nav { flex-wrap: wrap; gap: 8px 12px; } .x-links { order: 3; flex-basis: 100%; } .x-brand { margin-right: auto; } }
+
+      /* hero */
+      .x-hero { position: relative; margin-top: 16px; border-radius: var(--r-xl); overflow: hidden; min-height: min(78vh, 720px); display: flex; align-items: flex-end; border: 1px solid var(--x-line); }
+      .x-hero > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+      .x-hero::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(10,11,10,.25) 0%, rgba(10,11,10,.55) 45%, rgba(10,11,10,.96) 100%); }
+      .x-hero__copy { position: relative; z-index: 1; padding: clamp(24px, 5vw, 64px); max-width: 920px; display: grid; gap: 20px; }
+      .x-hero h1 { font-size: clamp(44px, 8.5vw, 112px); }
+      .x-hero h1 em { font-style: normal; color: var(--x-lime); }
+      .x-hero p.x-sub { font-size: clamp(16px, 1.8vw, 19px); line-height: 1.5; color: #d4d8cf; max-width: 620px; }
+      .x-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+      .x-statrow { display: flex; flex-wrap: wrap; gap: 8px 22px; font: var(--type-label); color: var(--x-dim); margin-top: 4px; }
+      .x-statrow b { font-family: var(--x-display); font-weight: 400; font-size: 22px; color: var(--x-text); margin-right: 6px; letter-spacing: 0.02em; }
+
+      /* sections */
+      .x-sec { padding-top: clamp(64px, 9vw, 112px); scroll-margin-top: 70px; }
+      .x-head { display: grid; gap: 10px; margin-bottom: 28px; max-width: 760px; }
+      .x-eyebrow { font: var(--type-tag); font-family: "Geist Mono", monospace; color: var(--x-lime); letter-spacing: 0.14em; text-transform: uppercase; }
+      .x-head h2 { font-size: clamp(36px, 5.5vw, 64px); }
+      .x-head p { color: var(--x-dim); font-size: 16px; line-height: 1.5; }
+      .x-panel { background: var(--x-panel); border: 1px solid var(--x-line); border-radius: var(--r-l); }
+
+      /* hatchery */
+      .x-app { display: grid; grid-template-columns: minmax(320px, 420px) minmax(0, 1fr); gap: 16px; align-items: start; }
+      @media (max-width: 920px) { .x-app { grid-template-columns: minmax(0, 1fr); } }
+      .x-controls { padding: 16px; display: grid; gap: 14px; }
+      .x-tabs { display: flex; gap: 4px; padding: 4px; background: var(--x-bg); border: 1px solid var(--x-line); border-radius: var(--r-pill); }
+      .x-tabs button { flex: 1; min-height: var(--tap); border: 0; background: transparent; color: var(--x-dim); border-radius: var(--r-pill); cursor: pointer; font: var(--type-small); font-weight: 600; padding: 0 10px; white-space: nowrap; }
+      .x-tabs button[aria-selected="true"] { background: var(--x-panel-2); color: var(--x-text); box-shadow: inset 0 0 0 1px var(--x-line-2); }
+      .x-preset { position: relative; display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; height: 112px; border-radius: var(--r-m); padding: 14px; overflow: hidden; border: 1px solid var(--x-line); }
+      .x-preset__name { position: relative; }
+      .x-preset__name small { display: block; font: var(--type-tag); color: rgba(255,255,255,.75); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 2px; }
+      .x-preset__name strong { font-family: var(--x-display); font-weight: 400; font-size: 26px; text-transform: uppercase; letter-spacing: .02em; }
+      .x-preset .x-btn { min-height: var(--tap); padding: 0 14px; background: rgba(10,11,10,.6); backdrop-filter: blur(8px); position: relative; }
+      .x-drop { display: flex; align-items: center; gap: 12px; padding: 14px; border: 1.5px dashed var(--x-line-2); border-radius: var(--r-m); cursor: pointer; color: var(--x-dim); font: var(--type-small); transition: border-color var(--dur-quick), background var(--dur-quick); }
+      .x-drop:hover, .x-drop.is-over { border-color: var(--x-lime); background: rgba(198,255,0,.04); color: var(--x-text); }
+      .x-drop input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+      .x-drop__icon { flex-shrink: 0; width: 48px; height: 48px; border-radius: 10px; background: var(--x-panel-2); display: grid; place-items: center; overflow: hidden; }
+      .x-drop__icon img { width: 100%; height: 100%; object-fit: cover; }
+      .x-drop strong { display: block; color: var(--x-text); font-weight: 600; }
+      .x-prompt { border: 1px solid var(--x-line); border-radius: var(--r-m); background: var(--x-bg); padding: 12px; display: grid; gap: 10px; }
+      .x-prompt:focus-within { border-color: var(--x-lime); }
+      .x-prompt textarea { width: 100%; min-height: 104px; resize: vertical; border: 0; outline: 0; background: transparent; color: var(--x-text); font: var(--type-body); line-height: 1.5; }
+      .x-prompt textarea::placeholder { color: #6e746a; }
+      .x-chip { display: inline-flex; align-items: center; gap: 6px; min-height: var(--tap); padding: 0 12px; border-radius: var(--r-pill); border: 1px solid var(--x-line-2); background: var(--x-panel-2); font: var(--type-small); font-weight: 500; color: var(--x-text); cursor: pointer; }
+      .x-chip[aria-pressed="true"] { border-color: var(--x-lime); color: var(--x-lime); }
+      .x-chip[aria-pressed="false"] { color: var(--x-dim); }
+      .x-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+      .x-field { display: grid; gap: 6px; }
+      .x-field--wide { grid-column: 1 / -1; }
+      .x-field label, .x-field .x-lbl { font: var(--type-tag); color: var(--x-dim); text-transform: uppercase; letter-spacing: .1em; }
+      .x-field select { appearance: none; -webkit-appearance: none; width: 100%; min-height: var(--tap); border-radius: var(--r-s); border: 1px solid var(--x-line-2); background: var(--x-panel-2) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none' stroke='%239aa096' stroke-width='1.6'%3E%3Cpath d='M1 1.5l5 5 5-5'/%3E%3C/svg%3E") no-repeat right 14px center; color: var(--x-text); padding: 0 36px 0 12px; font: var(--type-label); cursor: pointer; }
+      .x-field select:disabled { opacity: .4; cursor: not-allowed; }
+      .x-gen { display: grid; gap: 10px; padding-top: 4px; }
+      .x-gen__btn { width: 100%; min-height: 58px; border-radius: var(--r-m); font-family: var(--x-display); font-size: 24px; font-weight: 400; letter-spacing: .06em; text-transform: uppercase; justify-content: space-between; padding: 0 20px; }
+      .x-gen__cost { font-family: "Geist Mono", monospace; font-size: 13px; letter-spacing: 0; background: #0a0b0a; color: #c6ff00; padding: 4px 10px; border-radius: var(--r-pill); }
+      .x-gen__meta { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; font: var(--type-small); color: var(--x-dim); }
+      .x-gen__meta b { color: var(--x-text); font-family: "Geist Mono", monospace; font-weight: 400; }
+      .x-gen__warn { color: var(--x-red); font: var(--type-small); min-height: 0; }
+      .x-gen__warn:empty { display: none; }
+      .x-pill { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: var(--r-pill); border: 1px solid #6b1a2b; background: #1f0c11; color: #ffc2ce; font: var(--type-caption); line-height: 1.35; }
+      .x-pill::before { content: ""; width: 7px; height: 7px; flex-shrink: 0; border-radius: 50%; background: var(--x-red); box-shadow: 0 0 8px var(--x-red); }
+
+      .x-canvas { padding: 16px; min-height: 640px; display: grid; grid-template-rows: auto 1fr; gap: 16px; }
+      .x-canvas__top { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+      .x-canvas__top .x-tabs { flex: 0 1 280px; }
+      .x-empty { display: grid; place-items: center; text-align: center; gap: 12px; color: var(--x-dim); padding: 48px 16px; border: 1px dashed var(--x-line); border-radius: var(--r-m); }
+      .x-empty img { width: 72px; opacity: .6; margin-inline: auto; }
+      .x-history { display: grid; gap: 16px; align-content: start; }
+      .x-progress { position: relative; overflow: hidden; border-radius: var(--r-m); border: 1px solid var(--x-line-2); background: radial-gradient(120% 80% at 50% 0%, rgba(198,255,0,.08), transparent 60%), #070807; aspect-ratio: 16 / 9; display: grid; place-items: center; text-align: center; }
+      .x-progress::before { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(0deg, rgba(255,255,255,.035) 0 1px, transparent 1px 3px); }
+      .x-scan { position: absolute; left: 0; right: 0; height: 80px; top: -80px; background: linear-gradient(180deg, transparent, rgba(198,255,0,.22), transparent); animation: x-scan 1.6s linear infinite; }
+      @keyframes x-scan { to { top: 100%; } }
+      .x-progress__copy { position: relative; display: grid; gap: 10px; padding: 16px; }
+      .x-progress__pct { font-family: var(--x-display); font-size: clamp(40px, 6vw, 64px); color: var(--x-lime); text-transform: uppercase; }
+      .x-progress__line { font-family: "Geist Mono", monospace; font-size: 13px; color: var(--x-dim); }
+      .x-bar { width: min(320px, 70vw); height: 4px; border-radius: 4px; background: var(--x-line); overflow: hidden; margin-inline: auto; }
+      .x-bar i { display: block; height: 100%; width: 0; background: var(--x-lime); box-shadow: 0 0 12px var(--x-lime); }
+      .x-result { border-radius: var(--r-m); border: 1px solid var(--x-line); background: var(--x-panel-2); overflow: hidden; animation: x-in .5s var(--ease-out); }
+      @keyframes x-in { from { opacity: 0; transform: translateY(8px); } }
+      .x-result__media { position: relative; overflow: hidden; background: #000; }
+      .x-result__media img { width: 100%; height: 100%; object-fit: cover; animation: x-kb 14s ease-in-out infinite alternate; }
+      @keyframes x-kb { from { transform: scale(1) translate(0, 0); } to { transform: scale(1.18) translate(-3%, -2%); } }
+      .x-badge { position: absolute; top: 12px; left: 12px; font: var(--type-tag); text-transform: uppercase; letter-spacing: .08em; padding: 5px 10px; border-radius: var(--r-pill); background: rgba(10,11,10,.7); backdrop-filter: blur(8px); color: var(--x-lime); border: 1px solid rgba(198,255,0,.35); }
+      .x-dur { position: absolute; bottom: 12px; right: 12px; font-family: "Geist Mono", monospace; font-size: 12px; padding: 4px 8px; border-radius: 6px; background: rgba(10,11,10,.7); }
+      .x-result__body { padding: 14px 16px; display: grid; gap: 10px; }
+      .x-result__prompt { line-height: 1.45; }
+      .x-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+      .x-tags span { font: var(--type-caption); font-family: "Geist Mono", monospace; color: var(--x-dim); border: 1px solid var(--x-line); padding: 3px 8px; border-radius: 6px; }
+      .x-result__acts { display: flex; gap: 8px; flex-wrap: wrap; }
+      .x-result__acts .x-btn { min-height: 40px; padding: 0 16px; }
+      .x-tip { position: relative; display: inline-flex; }
+      .x-tip::after { content: attr(data-tip); position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%); white-space: nowrap; font: var(--type-caption); background: var(--x-text); color: var(--x-bg); padding: 6px 10px; border-radius: 8px; opacity: 0; pointer-events: none; transition: opacity var(--dur-quick); }
+      .x-tip:hover::after, .x-tip:focus-within::after { opacity: 1; }
+      .x-how { display: grid; gap: 12px; align-content: start; }
+      .x-how__step { display: grid; grid-template-columns: 64px 1fr; gap: 16px; align-items: center; padding: 20px; border-radius: var(--r-m); background: var(--x-panel-2); border: 1px solid var(--x-line); }
+      .x-how__step b { font-family: var(--x-display); font-weight: 400; font-size: 52px; color: var(--x-lime); line-height: 1; }
+      .x-how__step h3 { font-family: var(--x-display); font-weight: 400; font-size: 26px; text-transform: uppercase; letter-spacing: .02em; }
+      .x-how__step p { color: var(--x-dim); margin-top: 4px; }
+
+      /* modal */
+      .x-modal { border: 1px solid var(--x-line-2); border-radius: var(--r-l); background: var(--x-panel); color: var(--x-text); padding: 0; width: min(920px, calc(100vw - 24px)); max-height: calc(100vh - 32px); }
+      .x-modal::backdrop { background: rgba(0,0,0,.75); backdrop-filter: blur(4px); }
+      .x-modal__head { position: sticky; top: 0; z-index: 1; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 16px 20px; background: var(--x-panel); border-bottom: 1px solid var(--x-line); }
+      .x-modal__head h3 { font-family: var(--x-display); font-weight: 400; font-size: 26px; text-transform: uppercase; }
+      .x-close { width: var(--tap); height: var(--tap); border-radius: 50%; border: 1px solid var(--x-line-2); background: transparent; cursor: pointer; font-size: 20px; }
+      .x-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px; padding: 20px; }
+      .x-tile { text-align: left; border: 1px solid var(--x-line); border-radius: var(--r-m); background: var(--x-panel-2); padding: 0; overflow: hidden; cursor: pointer; transition: border-color var(--dur-quick), transform var(--dur-quick) var(--ease-out); }
+      .x-tile:hover { border-color: var(--x-line-2); transform: translateY(-2px); }
+      .x-tile[aria-pressed="true"] { border-color: var(--x-lime); box-shadow: 0 0 0 1px var(--x-lime); }
+      .x-tile__art { height: 96px; }
+      .x-tile__copy { padding: 10px 12px 12px; display: grid; gap: 4px; }
+      .x-tile__copy strong { font-family: var(--x-display); font-weight: 400; font-size: 18px; text-transform: uppercase; letter-spacing: .02em; }
+      .x-tile__copy span { font: var(--type-caption); color: var(--x-dim); line-height: 1.4; }
+      .x-reel { position: relative; aspect-ratio: 16 / 9; overflow: hidden; background: #000; }
+      .x-reel img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 1.2s; animation: x-kb 10s ease-in-out infinite alternate; }
+      .x-reel img.is-on { opacity: 1; }
+      .x-reel p { position: absolute; left: 20px; bottom: 16px; font-family: var(--x-display); font-size: 28px; text-transform: uppercase; text-shadow: 0 2px 12px #000; }
+
+      /* hive */
+      .x-hive { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+      @media (max-width: 720px) { .x-hive { grid-template-columns: minmax(0, 1fr); } }
+      .x-shot { position: relative; border-radius: var(--r-l); overflow: hidden; aspect-ratio: 4 / 3; border: 1px solid var(--x-line); background: #000; }
+      .x-shot img { width: 100%; height: 100%; object-fit: cover; transition: transform 1.2s var(--ease-out); }
+      .x-shot:hover img, .x-shot:focus-within img { transform: scale(1.08); }
+      .x-shot::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 45%, rgba(10,11,10,.92)); pointer-events: none; }
+      .x-shot__copy { position: absolute; z-index: 1; left: 0; right: 0; bottom: 0; padding: 20px; display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
+      .x-shot h3 { font-family: var(--x-display); font-weight: 400; font-size: clamp(26px, 3vw, 36px); text-transform: uppercase; }
+      .x-shot__copy p { font-family: "Geist Mono", monospace; font-size: 12px; color: #cfd3ca; margin-top: 4px; }
+      .x-shot .x-btn { background: rgba(10,11,10,.6); backdrop-filter: blur(8px); }
+      .x-shot .x-btn:hover { background: var(--x-lime); color: var(--x-bg); }
+
+      /* studios */
+      .x-feats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+      @media (max-width: 1000px) { .x-feats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+      @media (max-width: 520px) { .x-feats { grid-template-columns: minmax(0, 1fr); } }
+      .x-feat { padding: 20px; display: grid; gap: 10px; align-content: start; transition: border-color var(--dur-quick); }
+      .x-feat:hover { border-color: rgba(198,255,0,.4); }
+      .x-feat svg { width: 36px; height: 36px; color: var(--x-lime); }
+      .x-feat h3 { font-family: var(--x-display); font-weight: 400; font-size: 22px; text-transform: uppercase; letter-spacing: .02em; }
+      .x-feat p { color: var(--x-dim); line-height: 1.45; }
+
+      /* models */
+      .x-models { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 8px; scroll-snap-type: x mandatory; }
+      .x-model { flex: 0 0 auto; width: 250px; scroll-snap-align: start; padding: 16px 18px; border-radius: var(--r-m); border: 1px solid var(--x-line); background: var(--x-panel); display: grid; gap: 6px; }
+      .x-model span { font: var(--type-tag); font-family: "Geist Mono", monospace; text-transform: uppercase; letter-spacing: .1em; color: var(--x-lime); }
+      .x-model span.is-img { color: var(--x-red); }
+      .x-model strong { font-family: var(--x-display); font-weight: 400; font-size: 22px; text-transform: uppercase; }
+      .x-model p { color: var(--x-dim); font: var(--type-small); line-height: 1.45; }
+
+      /* pricing */
+      .x-toggle { display: inline-flex; margin-bottom: 20px; }
+      .x-toggle .x-save { margin-left: 6px; font: var(--type-tag); color: var(--x-bg); background: var(--x-lime); padding: 2px 6px; border-radius: 6px; }
+      .x-plans { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+      @media (max-width: 1000px) { .x-plans { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+      @media (max-width: 560px) { .x-plans { grid-template-columns: minmax(0, 1fr); } }
+      .x-plan { position: relative; padding: 22px; display: grid; gap: 14px; align-content: start; }
+      .x-plan.is-pop { border-color: var(--x-lime); box-shadow: 0 0 0 1px var(--x-lime), 0 20px 60px -30px rgba(198,255,0,.45); }
+      .x-plan__tag { position: absolute; top: -11px; right: 18px; font: var(--type-tag); font-weight: 600; letter-spacing: .1em; padding: 4px 10px; border-radius: var(--r-pill); background: var(--x-lime); color: var(--x-bg); }
+      .x-plan__tag--red { background: var(--x-red); color: #0a0b0a; }
+      .x-plan h3 { font-family: var(--x-display); font-weight: 400; font-size: 30px; text-transform: uppercase; }
+      .x-price { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+      .x-price strong { font-family: var(--x-display); font-weight: 400; font-size: 52px; line-height: 1; }
+      .x-price span { color: var(--x-dim); font: var(--type-small); }
+      .x-price s { color: var(--x-dim); font: var(--type-label); }
+      .x-plan__bill { font: var(--type-caption); color: var(--x-dim); min-height: 16px; }
+      .x-plan ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+      .x-plan li { display: flex; gap: 10px; font: var(--type-small); line-height: 1.4; }
+      .x-plan li::before { content: ""; flex-shrink: 0; width: 14px; height: 14px; margin-top: 2px; border-radius: 50%; background: rgba(198,255,0,.15) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14' fill='none' stroke='%23c6ff00' stroke-width='1.8'%3E%3Cpath d='M4 7.2l2 2 4-4.4'/%3E%3C/svg%3E") center / 14px; }
+      .x-plan .x-btn { width: 100%; }
+      .x-costs { margin-top: 24px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+      @media (max-width: 760px) { .x-costs { grid-template-columns: minmax(0, 1fr); } }
+      .x-costs table { width: 100%; border-collapse: collapse; }
+      .x-costs caption { text-align: left; padding: 16px 20px 6px; font-family: var(--x-display); font-size: 22px; text-transform: uppercase; }
+      .x-costs th, .x-costs td { padding: 12px 20px; border-top: 1px solid var(--x-line); text-align: left; font: var(--type-small); }
+      .x-costs thead th { font: var(--type-tag); color: var(--x-dim); text-transform: uppercase; letter-spacing: .1em; border-top: 0; }
+      .x-costs td { font-family: "Geist Mono", monospace; text-align: right; color: var(--x-lime); white-space: nowrap; }
+      .x-costs thead th:last-child { text-align: right; }
+      .x-costs__note { padding: 20px; display: grid; gap: 10px; color: var(--x-dim); line-height: 1.5; }
+      .x-costs__note strong { color: var(--x-text); }
+
+      /* cta */
+      .x-cta { margin-top: clamp(64px, 9vw, 112px); position: relative; overflow: hidden; border-radius: var(--r-xl); padding: clamp(40px, 7vw, 88px) clamp(24px, 5vw, 64px); background: radial-gradient(80% 120% at 100% 0%, rgba(255,45,85,.35), transparent 55%), radial-gradient(70% 110% at 0% 100%, rgba(198,255,0,.22), transparent 60%), var(--x-panel); border: 1px solid var(--x-line); display: grid; gap: 22px; justify-items: start; }
+      .x-cta h2 { font-size: clamp(40px, 7vw, 92px); max-width: 900px; }
+      .x-cta p { color: #cfd3ca; font-size: 16px; }
+
+      /* footer */
+      .x-foot { margin-top: 64px; padding: 40px 0 24px; border-top: 1px solid var(--x-line); display: grid; gap: 32px; }
+      .x-foot__top { display: grid; grid-template-columns: 1.3fr repeat(4, 1fr); gap: 24px; }
+      @media (max-width: 860px) { .x-foot__top { grid-template-columns: repeat(2, minmax(0, 1fr)); } .x-foot__brand { grid-column: 1 / -1; } }
+      .x-foot__brand { display: grid; gap: 14px; align-content: start; }
+      .x-foot h4 { margin: 0 0 10px; font: var(--type-tag); text-transform: uppercase; letter-spacing: .12em; color: var(--x-dim); }
+      .x-foot ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
+      .x-foot ul a { display: inline-flex; align-items: center; min-height: var(--tap); min-width: var(--tap); padding: 0; text-decoration: none; color: var(--x-text); font: var(--type-small); }
+      .x-foot ul a:hover { color: var(--x-lime); }
+      .x-socials { display: flex; gap: 8px; }
+      .x-socials a { width: var(--tap); height: var(--tap); border-radius: 50%; border: 1px solid var(--x-line-2); display: grid; place-items: center; color: var(--x-dim); }
+      .x-socials a:hover { color: var(--x-lime); border-color: var(--x-lime); }
+      .x-socials svg { width: 18px; height: 18px; }
+      .x-foot__base { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; font: var(--type-caption); color: var(--x-dim); }
+
+      @media (prefers-reduced-motion: reduce) {
+        .x-result__media img, .x-reel img, .x-scan { animation: none; }
+        .x-shot img { transition: none; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page" id="top">
+      <div class="x-banner" role="status">
+        <b>LAUNCH SWARM</b> — 60% off annual plans <span class="x-count" id="countdown" aria-label="Time left">72:00:00</span>
+      </div>
+      <header class="x-nav">
+        <a class="x-brand" href="#top"><img src="assets/pb_logo.png" alt="" /><span>PSYCHO BUG AI</span></a>
+        <nav class="x-links" aria-label="Main">
+          <a href="#hatchery" data-goto="video">Hatch</a>
+          <a href="#hatchery" data-goto="video">Video</a>
+          <a href="#hatchery" data-goto="image">Image</a>
+          <a href="#hatchery" data-goto="sound">Sound</a>
+          <a href="#studios">Swarm Studios</a>
+          <a href="#hive">Hive</a>
+          <a href="#pricing">Pricing</a>
+        </nav>
+        <a class="x-btn x-btn--lime" href="#pricing">Infest free</a>
+      </header>
+
+      <main class="main">
+        <section class="x-hero" aria-labelledby="hero-title">
+          <img src="assets/pb_hero.png" alt="A giant beetle with glowing green eyes in a subway tunnel" />
+          <div class="x-hero__copy">
+            <p class="x-eyebrow">AI video &amp; image studio</p>
+            <h1 class="x-display" id="hero-title">Cinema that <em>crawls</em> under your skin</h1>
+            <p class="x-sub">Turn a prompt, a photo or a nightmare into 4K video and stills. One studio, every model, 300+ unsettling presets.</p>
+            <div class="x-row">
+              <a class="x-btn x-btn--lime" href="#hatchery">Start hatching</a>
+              <button class="x-btn" type="button" id="reel-open">▶ Watch the reel</button>
+            </div>
+            <p class="x-statrow"><span><b>300+</b>presets</span><span><b>4K</b>output</span><span><b>12</b>models</span><span><b>20s</b>max clip length</span></p>
+          </div>
+        </section>
+
+        <section class="x-sec" id="hatchery" aria-labelledby="hatch-title">
+          <div class="x-head">
+            <p class="x-eyebrow">01 · The Hatchery</p>
+            <h2 class="x-display" id="hatch-title">Feed it. Mutate it. <span class="x-lime">Hatch it.</span></h2>
+            <p>Pick a preset, drop a reference, describe the dread. Try the studio below.</p>
+          </div>
+
+          <div class="x-app">
+            <form class="x-panel x-controls" id="creator" onsubmit="return false">
+              <div class="x-tabs" role="tablist" aria-label="Mode">
+                <button type="button" role="tab" aria-selected="true" data-mode="create">Create Video</button>
+                <button type="button" role="tab" aria-selected="false" data-mode="edit">Edit Video</button>
+                <button type="button" role="tab" aria-selected="false" data-mode="image">Create Image</button>
+              </div>
+
+              <div class="x-preset" id="preset-card">
+                <div class="x-preset__name"><small>Preset</small><strong id="preset-name">Larva</strong></div>
+                <button class="x-btn" type="button" id="preset-open">Change</button>
+              </div>
+
+              <label class="x-drop" id="drop">
+                <input type="file" id="file" accept="image/*,video/*,audio/*" />
+                <span class="x-drop__icon" id="drop-thumb"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>
+                <span><strong id="drop-title">Add references</strong><span id="drop-sub">image, video or audio</span></span>
+              </label>
+
+              <div class="x-prompt">
+                <textarea id="prompt" aria-label="Prompt" placeholder="Describe your nightmare… e.g. 'a moth the size of a bus lands on a neon motel sign in the rain'"></textarea>
+                <div class="x-row">
+                  <button class="x-chip" type="button" id="chip-char" aria-pressed="false">@Characters</button>
+                  <button class="x-chip" type="button" id="chip-sound" aria-pressed="true">♪ Sound: On</button>
+                </div>
+              </div>
+
+              <div class="x-fields">
+                <div class="x-field x-field--wide">
+                  <label for="model">Model</label>
+                  <select id="model">
+                    <option value="m3">Mandible 3 — flagship video</option>
+                    <option value="m3t">Mandible 3 Turbo — fast drafts</option>
+                    <option value="c2">Chrysalis 2 — image</option>
+                    <option value="c2u">Chrysalis 2 Ultra 4K — image</option>
+                    <option value="omni">Hivemind Omni — multi-reference video</option>
+                  </select>
+                </div>
+                <div class="x-field">
+                  <label for="duration">Duration</label>
+                  <select id="duration"><option>5s</option><option>10s</option><option>15s</option><option>20s</option></select>
+                </div>
+                <div class="x-field">
+                  <label for="aspect">Aspect</label>
+                  <select id="aspect"><option>16:9</option><option>9:16</option><option>1:1</option><option>21:9</option></select>
+                </div>
+                <div class="x-field">
+                  <label for="quality">Quality</label>
+                  <select id="quality"><option>720p</option><option selected>1080p</option><option>4K</option></select>
+                </div>
+                <div class="x-field">
+                  <label for="sound">Sound</label>
+                  <select id="sound"><option value="on">On</option><option value="off">Off</option></select>
+                </div>
+              </div>
+
+              <div class="x-gen">
+                <button class="x-btn x-btn--lime x-gen__btn" type="button" id="generate">Generate <span class="x-gen__cost" id="cost">40 credits</span></button>
+                <p class="x-gen__warn" id="warn" role="alert"></p>
+                <div class="x-gen__meta">
+                  <span>Credits: <b id="balance">150</b> (free trial)</span>
+                  <span id="rate">40 / 5s at 1080p</span>
+                </div>
+                <p class="x-pill">Preview build — generation is simulated, not connected to a model yet.</p>
+              </div>
+            </form>
+
+            <div class="x-panel x-canvas">
+              <div class="x-canvas__top">
+                <div class="x-tabs" role="tablist" aria-label="Canvas">
+                  <button type="button" role="tab" aria-selected="false" data-view="history">History</button>
+                  <button type="button" role="tab" aria-selected="true" data-view="how">How it works</button>
+                </div>
+                <span class="x-eyebrow" id="job-count">0 hatched</span>
+              </div>
+
+              <div class="x-history" id="view-history" hidden>
+                <div class="x-empty" id="empty">
+                  <img src="assets/pb_logo.png" alt="" />
+                  <p>Nothing has hatched yet. Write a prompt and press Generate.</p>
+                </div>
+              </div>
+
+              <div class="x-how" id="view-how">
+                <div class="x-how__step"><b>1</b><div><h3>Feed it</h3><p>Drop a photo or write a prompt.</p></div></div>
+                <div class="x-how__step"><b>2</b><div><h3>Pick a mutation</h3><p>Choose one of 300+ presets.</p></div></div>
+                <div class="x-how__step"><b>3</b><div><h3>Hatch</h3><p>Get your clip in under a minute.</p></div></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="x-sec" id="hive" aria-labelledby="hive-title">
+          <div class="x-head">
+            <p class="x-eyebrow">02 · The Hive</p>
+            <h2 class="x-display" id="hive-title">Hatched by the swarm</h2>
+            <p>Sample work from the community. Steal a prompt and make it worse.</p>
+          </div>
+          <div class="x-hive">
+            <article class="x-shot">
+              <img src="assets/pb_gallery_moth.png" alt="A giant moth on a neon motel sign" />
+              <div class="x-shot__copy">
+                <div><h3>Motel Moth</h3><p>Mandible 3 · 10s</p></div>
+                <button class="x-btn" type="button" data-use="m3|10s|a moth the size of a bus lands on a neon motel sign in the rain, wings dripping, flickering vacancy light">Use this prompt</button>
+              </div>
+            </article>
+            <article class="x-shot">
+              <img src="assets/pb_gallery_mantis.png" alt="A chrome praying mantis" />
+              <div class="x-shot__copy">
+                <div><h3>Chrome Mantis</h3><p>Hivemind Omni · 15s</p></div>
+                <button class="x-btn" type="button" data-use="omni|15s|a chrome praying mantis slowly turns its head toward the camera in a mirrored corridor, cold reflections">Use this prompt</button>
+              </div>
+            </article>
+            <article class="x-shot">
+              <img src="assets/pb_gallery_swarm.png" alt="A swarm of insects forming a burning skull" />
+              <div class="x-shot__copy">
+                <div><h3>Skullfire Swarm</h3><p>Mandible 3 Turbo · 5s</p></div>
+                <button class="x-btn" type="button" data-use="m3t|5s|a swarm of fireflies gathers into a burning skull over a dark field, then scatters">Use this prompt</button>
+              </div>
+            </article>
+            <article class="x-shot">
+              <img src="assets/pb_gallery_spider.png" alt="A spider wearing a masquerade mask" />
+              <div class="x-shot__copy">
+                <div><h3>Masquerade</h3><p>Chrysalis 2 Ultra · still</p></div>
+                <button class="x-btn" type="button" data-use="c2u|still|portrait of a spider wearing an ornate venetian masquerade mask, candlelit ballroom, velvet shadows">Use this prompt</button>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="x-sec" id="studios" aria-labelledby="studios-title">
+          <div class="x-head">
+            <p class="x-eyebrow">03 · Swarm Studios</p>
+            <h2 class="x-display" id="studios-title">Eight studios. One nest.</h2>
+            <p>Ready-made workflows for the things creators actually ship.</p>
+          </div>
+          <div class="x-feats">
+            <article class="x-panel x-feat">
+              <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="11" y="4" width="14" height="28" rx="3"/><path d="M16 15l5 3-5 3z"/></svg>
+              <h3>Shorts Nest</h3><p>Vertical shorts from one idea.</p>
+            </article>
+            <article class="x-panel x-feat">
+              <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="4" y="8" width="28" height="20" rx="3"/><path d="M12 22c2-4 10-4 12 0M18 13v3"/></svg>
+              <h3>Faceless Channel</h3><p>Narrated videos without filming.</p>
+            </article>
+            <article class="x-panel x-feat">
+              <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M8 12h20l-2 18H10z"/><path d="M13 12a5 5 0 0110 0"/></svg>
+              <h3>Ad Larvae</h3><p>Product ads from a photo.</p>
+            </article>
+            <article class="x-panel x-feat">
+              <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 18c4-8 20-8 24 0-4 8-20 8-24 0z"/><path d="M11 18h14"/></svg>
+              <h3>Lip-Sync Lab</h3><p>Make any character talk.</p>
+            </article>
+            <article class="x-panel x-feat">
+              <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="4" y="11" width="20" height="16" rx="3"/><path d="M24 16l8-4v14l-8-4"/><path d="M8 7h8" stroke-linecap="round"/></svg>
+              <h3>Re-Shoot Room</h3><p>Change angle, light and camera of an existing video.</p>
+            </article>
+            <article class="x-panel x-feat">
+              <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 4c7 4 10 10 10 14s-4 14-10 14S8 22 8 18s3-10 10-14z"/><path d="M14 20l4-4 4 4M18 16v8"/></svg>
+              <h3>Upscale Cocoon</h3><p>4K upscaling for images and video.</p>
+            </article>
+            <article class="x-panel x-feat">
+              <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="14" r="5"/><circle cx="24" cy="14" r="5"/><path d="M4 30c1-5 4-8 8-8s7 3 8 8M16 30c1-5 4-8 8-8s7 3 8 8"/></svg>
+              <h3>Character Molt</h3><p>Consistent character across scenes.</p>
+            </article>
+            <article class="x-panel x-feat">
+              <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 10l-8 8 8 8M23 10l8 8-8 8M20 7l-4 22"/></svg>
+              <h3>Swarm API &amp; agent tools</h3><p>Plug into your own apps and AI assistants.</p>
+            </article>
+          </div>
+        </section>
+
+        <section class="x-sec" id="models" aria-labelledby="models-title">
+          <div class="x-head">
+            <p class="x-eyebrow">04 · Models</p>
+            <h2 class="x-display" id="models-title">Every model in one hive</h2>
+          </div>
+          <div class="x-models">
+            <div class="x-model"><span>Video</span><strong>Mandible 3</strong><p>Flagship video: cinematic motion, sound and 4K.</p></div>
+            <div class="x-model"><span>Video</span><strong>Mandible 3 Turbo</strong><p>Fast, cheap drafts to test an idea.</p></div>
+            <div class="x-model"><span>Video</span><strong>Hivemind Omni</strong><p>Multi-reference video: mix images, clips and audio.</p></div>
+            <div class="x-model"><span class="is-img">Image</span><strong>Chrysalis 2</strong><p>Quick, sharp stills for one credit.</p></div>
+            <div class="x-model"><span class="is-img">Image</span><strong>Chrysalis 2 Ultra 4K</strong><p>Print-grade 4K stills with fine texture.</p></div>
+          </div>
+        </section>
+
+        <section class="x-sec" id="pricing" aria-labelledby="pricing-title">
+          <div class="x-head">
+            <p class="x-eyebrow">05 · Pricing</p>
+            <h2 class="x-display" id="pricing-title">Pick your <span class="x-red">infestation</span></h2>
+          </div>
+          <div class="x-tabs x-toggle" role="tablist" aria-label="Billing">
+            <button type="button" role="tab" aria-selected="false" data-bill="monthly">Monthly</button>
+            <button type="button" role="tab" aria-selected="true" data-bill="annual">Annual <span class="x-save">−60%</span></button>
+          </div>
+          <div class="x-plans">
+            <article class="x-panel x-plan">
+              <h3>Larva</h3>
+              <div class="x-price"><strong>Free</strong></div>
+              <p class="x-plan__bill">Forever</p>
+              <ul><li>150 trial credits</li><li>720p output</li><li>Watermark</li><li>1 job at a time</li></ul>
+              <a class="x-btn" href="#hatchery">Start free</a>
+            </article>
+            <article class="x-panel x-plan">
+              <h3>Crawler</h3>
+              <div class="x-price" data-annual="12" data-monthly="29"></div>
+              <p class="x-plan__bill"></p>
+              <ul><li>800 credits</li><li>1080p output</li><li>No watermark</li><li>2 concurrent jobs</li></ul>
+              <a class="x-btn" href="#hatchery">Choose Crawler</a>
+            </article>
+            <article class="x-panel x-plan is-pop">
+              <span class="x-plan__tag">MOST POPULAR</span>
+              <h3>Swarm</h3>
+              <div class="x-price" data-annual="24" data-monthly="59"></div>
+              <p class="x-plan__bill"></p>
+              <ul><li>2,000 credits</li><li>4K output</li><li>All presets</li><li>4 concurrent jobs</li><li>Commercial use</li></ul>
+              <a class="x-btn x-btn--lime" href="#hatchery">Choose Swarm</a>
+            </article>
+            <article class="x-panel x-plan">
+              <span class="x-plan__tag x-plan__tag--red">BEST VALUE</span>
+              <h3>Queen</h3>
+              <div class="x-price" data-annual="49" data-monthly="119"></div>
+              <p class="x-plan__bill"></p>
+              <ul><li>6,000 credits</li><li>Unlimited concurrent jobs</li><li>API access</li><li>Priority queue</li></ul>
+              <a class="x-btn" href="#hatchery">Choose Queen</a>
+            </article>
+          </div>
+          <div class="x-costs">
+            <div class="x-panel">
+              <table>
+                <caption>Credit costs</caption>
+                <thead><tr><th scope="col">Model</th><th scope="col">Credits</th></tr></thead>
+                <tbody>
+                  <tr><th scope="row">Mandible 3 · 1080p</th><td>40 / 5s</td></tr>
+                  <tr><th scope="row">Mandible 3 · 4K</th><td>80 / 5s</td></tr>
+                  <tr><th scope="row">Mandible 3 Turbo · 720p</th><td>6 / 5s</td></tr>
+                  <tr><th scope="row">Hivemind Omni · 1080p</th><td>50 / 5s</td></tr>
+                  <tr><th scope="row">Chrysalis 2 · image</th><td>1</td></tr>
+                  <tr><th scope="row">Chrysalis 2 Ultra 4K · image</th><td>4</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="x-panel x-costs__note">
+              <p><strong>How credits work.</strong> Video costs scale with length: a 10s clip costs twice a 5s one, and 4K costs double 1080p. Stills cost per image.</p>
+              <p>The 150 free trial credits cover three 5s Mandible 3 clips at 1080p, or 25 Turbo drafts at 720p.</p>
+              <p class="x-pill">Prices illustrative for the preview.</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="x-cta" aria-labelledby="cta-title">
+          <p class="x-eyebrow">150 credits on us</p>
+          <h2 class="x-display" id="cta-title">Your nightmares deserve a <span class="x-lime">budget</span></h2>
+          <p>No card needed. Hatch your first clip in under a minute.</p>
+          <a class="x-btn x-btn--lime" href="#hatchery">Start hatching free</a>
+        </section>
+      </main>
+
+      <footer class="x-foot">
+        <div class="x-foot__top">
+          <div class="x-foot__brand">
+            <a class="x-brand" href="#top"><img src="assets/pb_logo.png" alt="" /><span>PSYCHO BUG AI</span></a>
+            <div class="x-socials">
+              <a href="#" aria-label="X"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.8 3h3.2l-7 8 8.2 10H16l-5-6.3L5.3 21H2l7.5-8.6L1.7 3H8l4.5 5.8zm-1.1 16h1.8L7.3 4.9H5.4z"/></svg></a>
+              <a href="#" aria-label="YouTube"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M22 8.2a3 3 0 00-2.1-2.1C18 5.6 12 5.6 12 5.6s-6 0-7.9.5A3 3 0 002 8.2 31 31 0 001.6 12 31 31 0 002 15.8a3 3 0 002.1 2.1c1.9.5 7.9.5 7.9.5s6 0 7.9-.5a3 3 0 002.1-2.1 31 31 0 00.4-3.8 31 31 0 00-.4-3.8zM10 15V9l5.2 3z"/></svg></a>
+              <a href="#" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg></a>
+              <a href="#" aria-label="Discord"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.3 5.3A16 16 0 0015.4 4l-.5 1a15 15 0 00-5.8 0L8.6 4a16 16 0 00-3.9 1.3C2.2 9 1.5 12.7 1.9 16.3a16 16 0 004.8 2.4l1-1.6-1.6-.8.4-.3a11.5 11.5 0 0011 0l.4.3-1.6.8 1 1.6a16 16 0 004.8-2.4c.5-4.2-.7-7.8-2.8-11zM8.5 14.2c-1 0-1.7-.9-1.7-2s.8-2 1.7-2 1.8.9 1.7 2-.8 2-1.7 2zm7 0c-1 0-1.7-.9-1.7-2s.8-2 1.7-2 1.8.9 1.7 2-.8 2-1.7 2z"/></svg></a>
+            </div>
+          </div>
+          <div><h4>Create</h4><ul><li><a href="#">Hatch</a></li><li><a href="#">Video</a></li><li><a href="#">Image</a></li><li><a href="#">Sound</a></li><li><a href="#">Hive</a></li><li><a href="#">Pricing</a></li></ul></div>
+          <div><h4>Studios</h4><ul><li><a href="#">Shorts Nest</a></li><li><a href="#">Faceless Channel</a></li><li><a href="#">Ad Larvae</a></li><li><a href="#">Lip-Sync Lab</a></li><li><a href="#">Re-Shoot Room</a></li><li><a href="#">Upscale Cocoon</a></li><li><a href="#">Character Molt</a></li><li><a href="#">Swarm API &amp; agent tools</a></li></ul></div>
+          <div><h4>Models</h4><ul><li><a href="#">Mandible 3</a></li><li><a href="#">Mandible 3 Turbo</a></li><li><a href="#">Hivemind Omni</a></li><li><a href="#">Chrysalis 2</a></li><li><a href="#">Chrysalis 2 Ultra 4K</a></li></ul></div>
+          <div><h4>Company</h4><ul><li><a href="#">About</a></li><li><a href="#">Careers</a></li><li><a href="#">Blog</a></li><li><a href="#">Terms</a></li><li><a href="#">Privacy</a></li><li><a href="#">Contact</a></li></ul></div>
+        </div>
+        <div class="x-foot__base">
+          <p class="x-pill">Preview build — generation is simulated, not connected to a model yet.</p>
+          <p>© 2026 Psycho Bug AI</p>
+        </div>
+      </footer>
+
+      <dialog class="x-modal" id="preset-modal" aria-labelledby="preset-title">
+        <div class="x-modal__head"><h3 id="preset-title">Choose a mutation</h3><button class="x-close" type="button" data-close aria-label="Close">×</button></div>
+        <div class="x-grid" id="preset-grid"></div>
+      </dialog>
+
+      <dialog class="x-modal" id="reel-modal" aria-labelledby="reel-title">
+        <div class="x-modal__head"><h3 id="reel-title">The reel</h3><button class="x-close" type="button" data-close aria-label="Close">×</button></div>
+        <div class="x-reel" id="reel">
+          <img src="assets/pb_hero.png" alt="" class="is-on" data-t="Subway Beetle" />
+          <p id="reel-cap">Subway Beetle</p>
+        </div>
+      </dialog>
+    </div>
+    <script src="hark.js"></script>
+    <script>
+      (function () {
+        var $ = function (s, r) { return (r || document).querySelector(s); };
+        var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+        var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+        /* countdown: 72 hours from load */
+        var end = Date.now() + 72 * 3600 * 1000, cd = $("#countdown");
+        function pad(n) { return String(n).padStart(2, "0"); }
+        function tick() {
+          var s = Math.max(0, Math.floor((end - Date.now()) / 1000));
+          cd.textContent = pad(Math.floor(s / 3600)) + ":" + pad(Math.floor((s % 3600) / 60)) + ":" + pad(s % 60);
+        }
+        tick(); setInterval(tick, 1000);
+
+        /* presets */
+        var presets = [
+          ["Larva", "General purpose. Full manual control.", "linear-gradient(135deg,#2a2f26,#151714 60%,#3a4a10)"],
+          ["Swarm Burst", "Thousands of insects erupt from the frame.", "radial-gradient(circle at 30% 40%,#c6ff00 0 6%,transparent 7%),radial-gradient(circle at 70% 60%,#c6ff00 0 4%,transparent 5%),radial-gradient(circle at 55% 25%,#c6ff00 0 3%,transparent 4%),linear-gradient(135deg,#1b2a05,#0a0b0a)"],
+          ["Molting Reveal", "Skin splits to show what was underneath.", "linear-gradient(110deg,#5a3a1e 0 45%,#ff2d55 48%,#c6ff00 52%,#183008 55%)"],
+          ["Compound Eye POV", "See the scene through a thousand lenses.", "radial-gradient(circle,#3c6e00 18%,transparent 20%) 0 0/18px 18px,radial-gradient(circle,#1a3300 18%,transparent 20%) 9px 9px/18px 18px,#0d1408"],
+          ["Night Crawl", "Low, slow tracking along the ground at night.", "linear-gradient(180deg,#05060c,#101a3a 60%,#2d4a12)"],
+          ["Infestation Zoom", "A crash zoom into the nest.", "repeating-radial-gradient(circle at 50% 50%,#c6ff00 0 2px,#0a0b0a 3px 14px)"],
+          ["Shell Crack", "Hard surfaces fracture and split open.", "linear-gradient(60deg,transparent 48%,#c6ff00 49% 50%,transparent 51%),linear-gradient(-30deg,transparent 48%,#c6ff00 49% 50%,transparent 51%),linear-gradient(135deg,#3b3328,#14110d)"],
+          ["Antenna Twitch", "Tiny nervous jitters on every subject.", "repeating-linear-gradient(80deg,#c6ff00 0 1px,transparent 1px 22px),linear-gradient(135deg,#1e1a10,#0a0b0a)"],
+          ["Static Hive", "Analog TV noise and broken signal.", "repeating-linear-gradient(0deg,#2a2a2a 0 2px,#111 2px 4px),linear-gradient(90deg,#ff2d55,#c6ff00,#00e0ff)"],
+          ["Glitch Mantis", "Datamoshed limbs and RGB split.", "linear-gradient(90deg,#ff2d55 0 33%,#00e0ff 33% 66%,#c6ff00 66%)"],
+          ["Slow Bloom", "Something organic unfurls in slow motion.", "radial-gradient(circle at 50% 70%,#ff2d55,#5a0f22 40%,#0a0b0a 75%)"],
+          ["Paranoia Dolly", "Vertigo dolly-zoom that warps the room.", "conic-gradient(from 0deg at 50% 50%,#0a0b0a,#c6ff00,#0a0b0a,#ff2d55,#0a0b0a)"]
+        ];
+        var current = 0, grid = $("#preset-grid"), pModal = $("#preset-modal");
+        presets.forEach(function (p, i) {
+          var b = document.createElement("button");
+          b.type = "button"; b.className = "x-tile"; b.setAttribute("aria-pressed", i === 0 ? "true" : "false");
+          b.innerHTML = '<div class="x-tile__art"></div><div class="x-tile__copy"><strong></strong><span></span></div>';
+          $(".x-tile__art", b).style.background = p[2];
+          $("strong", b).textContent = p[0]; $("span", b).textContent = p[1];
+          b.addEventListener("click", function () { setPreset(i); pModal.close(); });
+          grid.appendChild(b);
+        });
+        function setPreset(i) {
+          current = i;
+          $("#preset-name").textContent = presets[i][0];
+          $("#preset-card").style.background = "linear-gradient(0deg,rgba(10,11,10,.75),rgba(10,11,10,.1))," + presets[i][2];
+          $$(".x-tile", grid).forEach(function (t, k) { t.setAttribute("aria-pressed", k === i ? "true" : "false"); });
+        }
+        setPreset(0);
+        $("#preset-open").addEventListener("click", function () { pModal.showModal(); });
+        $$("dialog").forEach(function (d) {
+          d.addEventListener("click", function (e) { if (e.target === d || e.target.closest("[data-close]")) d.close(); });
+        });
+
+        /* reel: hero plus the hive images, cloned so they stay folded */
+        var reel = $("#reel"), reelCap = $("#reel-cap"), reelTimer = null;
+        $$(".x-shot").forEach(function (s) {
+          var im = $("img", s).cloneNode(); im.className = ""; im.alt = ""; im.removeAttribute("loading");
+          im.setAttribute("data-t", $("h3", s).textContent); reel.insertBefore(im, reelCap);
+        });
+        $("#reel-open").addEventListener("click", function () {
+          var imgs = $$("img", reel), k = 0;
+          $("#reel-modal").showModal();
+          clearInterval(reelTimer);
+          reelTimer = setInterval(function () {
+            imgs[k].classList.remove("is-on"); k = (k + 1) % imgs.length;
+            imgs[k].classList.add("is-on"); reelCap.textContent = imgs[k].getAttribute("data-t");
+          }, 3200);
+        });
+        $("#reel-modal").addEventListener("close", function () { clearInterval(reelTimer); });
+
+        /* form state */
+        var model = $("#model"), duration = $("#duration"), quality = $("#quality"), aspect = $("#aspect"), sound = $("#sound");
+        var prompt = $("#prompt"), genBtn = $("#generate"), warn = $("#warn");
+        var balance = 150;
+        var info = {
+          m3: { name: "Mandible 3", video: true, rate: { "720p": 20, "1080p": 40, "4K": 80 } },
+          m3t: { name: "Mandible 3 Turbo", video: true, rate: { "720p": 6, "1080p": 12, "4K": 24 } },
+          omni: { name: "Hivemind Omni", video: true, rate: { "720p": 25, "1080p": 50, "4K": 100 } },
+          c2: { name: "Chrysalis 2", video: false, rate: { "720p": 1, "1080p": 1, "4K": 2 } },
+          c2u: { name: "Chrysalis 2 Ultra 4K", video: false, rate: { "720p": 4, "1080p": 4, "4K": 4 } }
+        };
+        function cost() {
+          var m = info[model.value], r = m.rate[quality.value];
+          return m.video ? r * (parseInt(duration.value, 10) / 5) : r;
+        }
+        function refresh() {
+          var m = info[model.value], c = cost();
+          duration.disabled = !m.video; sound.disabled = !m.video;
+          $("#chip-sound").disabled = !m.video;
+          $("#cost").textContent = c + (c === 1 ? " credit" : " credits");
+          $("#rate").textContent = m.video ? m.rate[quality.value] + " / 5s at " + quality.value : m.rate[quality.value] + " per image";
+          $("#balance").textContent = balance;
+          warn.textContent = c > balance ? "Not enough credits for this job. Try Turbo, 720p or a shorter clip." : "";
+          genBtn.disabled = c > balance || busy;
+        }
+        [model, duration, quality, aspect].forEach(function (el) { el.addEventListener("change", function () { syncMode(); refresh(); }); });
+
+        /* sound select and chip stay in sync */
+        var chipSound = $("#chip-sound");
+        function setSound(on) {
+          sound.value = on ? "on" : "off";
+          chipSound.setAttribute("aria-pressed", on ? "true" : "false");
+          chipSound.textContent = "♪ Sound: " + (on ? "On" : "Off");
+        }
+        chipSound.addEventListener("click", function () { setSound(sound.value !== "on"); });
+        sound.addEventListener("change", function () { setSound(sound.value === "on"); });
+
+        var chipChar = $("#chip-char");
+        chipChar.addEventListener("click", function () {
+          var on = chipChar.getAttribute("aria-pressed") !== "true";
+          chipChar.setAttribute("aria-pressed", on ? "true" : "false");
+          chipChar.textContent = on ? "✓ @Characters" : "@Characters";
+          if (on) {
+            if (prompt.value.indexOf("@Character") === -1) prompt.value = (prompt.value.trim() ? prompt.value.replace(/\s*$/, " ") : "") + "@Character ";
+          } else {
+            prompt.value = prompt.value.replace(/\s?@Character\s?/g, " ").replace(/^\s+/, "");
+          }
+          prompt.focus();
+        });
+
+        /* mode tabs */
+        var modeTabs = $$("[data-mode]");
+        function setMode(mode) {
+          modeTabs.forEach(function (t) { t.setAttribute("aria-selected", t.dataset.mode === mode ? "true" : "false"); });
+          var isImg = info[model.value].video === false;
+          if (mode === "image" && !isImg) model.value = "c2";
+          if (mode !== "image" && isImg) model.value = "m3";
+          $("#drop-title").textContent = mode === "edit" ? "Add the video to edit" : "Add references";
+          prompt.placeholder = mode === "edit" ? "Describe the edit… e.g. 'make the hallway lights flicker and add something crawling on the ceiling'" : "Describe your nightmare… e.g. 'a moth the size of a bus lands on a neon motel sign in the rain'";
+          refresh();
+        }
+        function syncMode() {
+          var sel = $("[data-mode][aria-selected='true']").dataset.mode, isImg = !info[model.value].video;
+          if (isImg && sel !== "image") modeTabs.forEach(function (t) { t.setAttribute("aria-selected", t.dataset.mode === "image" ? "true" : "false"); });
+          if (!isImg && sel === "image") modeTabs.forEach(function (t) { t.setAttribute("aria-selected", t.dataset.mode === "create" ? "true" : "false"); });
+        }
+        modeTabs.forEach(function (t) { t.addEventListener("click", function () { setMode(t.dataset.mode); }); });
+
+        $$("[data-goto]").forEach(function (a) {
+          a.addEventListener("click", function () {
+            var g = a.dataset.goto;
+            if (g === "image") setMode("image");
+            else { setMode("create"); if (g === "sound") setSound(true); }
+          });
+        });
+
+        /* reference drop zone: local thumbnail only */
+        var drop = $("#drop"), file = $("#file"), thumb = $("#drop-thumb");
+        function showFile(f) {
+          if (!f) return;
+          $("#drop-title").textContent = f.name.length > 32 ? f.name.slice(0, 30) + "…" : f.name;
+          $("#drop-sub").textContent = (f.type.split("/")[0] || "file") + " · " + Math.max(1, Math.round(f.size / 1024)) + " KB · added";
+          if (f.type.indexOf("image/") === 0) {
+            var r = new FileReader();
+            r.onload = function () {
+              var svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48" preserveAspectRatio="xMidYMid slice"><image href="' + r.result + '" width="48" height="48" preserveAspectRatio="xMidYMid slice"/></svg>';
+              thumb.innerHTML = svg;
+            };
+            r.readAsDataURL(f);
+          } else {
+            thumb.innerHTML = '<span style="font:var(--type-tag);color:var(--x-lime)">' + (f.type.indexOf("audio") === 0 ? "AUDIO" : "VIDEO") + "</span>";
+          }
+        }
+        file.addEventListener("change", function () { showFile(file.files[0]); });
+        ["dragenter", "dragover"].forEach(function (ev) { drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.add("is-over"); }); });
+        ["dragleave", "drop"].forEach(function (ev) { drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.remove("is-over"); }); });
+        drop.addEventListener("drop", function (e) { if (e.dataTransfer.files[0]) showFile(e.dataTransfer.files[0]); });
+
+        /* canvas tabs */
+        var viewTabs = $$("[data-view]");
+        function setView(v) {
+          viewTabs.forEach(function (t) { t.setAttribute("aria-selected", t.dataset.view === v ? "true" : "false"); });
+          $("#view-history").hidden = v !== "history"; $("#view-how").hidden = v !== "how";
+        }
+        viewTabs.forEach(function (t) { t.addEventListener("click", function () { setView(t.dataset.view); }); });
+
+        /* generation (simulated) */
+        var sources = $$(".x-shot img"), jobs = 0, busy = false;
+        var lines = ["Growing exoskeleton", "Calibrating compound eyes", "Laying frames in the dark", "Teaching legs to twitch", "Rendering dread", "Sharpening mandibles", "Sealing the cocoon"];
+        var ratio = { "16:9": "16 / 9", "9:16": "9 / 16", "1:1": "1 / 1", "21:9": "21 / 9" };
+        var history = $("#view-history");
+
+        genBtn.addEventListener("click", function () {
+          if (busy) return;
+          var text = prompt.value.trim();
+          if (!text) { warn.textContent = "Feed it first: write a prompt."; prompt.focus(); return; }
+          var c = cost();
+          if (c > balance) { refresh(); return; }
+          balance -= c; busy = true; refresh();
+          var job = { text: text, m: info[model.value], dur: duration.value, aspect: aspect.value, q: quality.value, sound: sound.value === "on", preset: presets[current][0] };
+          setView("history");
+          var empty = $("#empty"); if (empty) empty.remove();
+          var pr = document.createElement("div");
+          pr.className = "x-progress";
+          pr.innerHTML = '<div class="x-scan"></div><div class="x-progress__copy"><p class="x-progress__pct">Hatching… 0%</p><div class="x-bar"><i></i></div><p class="x-progress__line">' + lines[0] + "…</p></div>";
+          history.insertBefore(pr, history.firstChild);
+          var t0 = performance.now(), D = 4000, pct = $(".x-progress__pct", pr), bar = $(".x-bar i", pr), line = $(".x-progress__line", pr);
+          (function step(now) {
+            var p = Math.min(1, (now - t0) / D), n = Math.round(p * 100);
+            pct.textContent = "Hatching… " + n + "%";
+            bar.style.width = n + "%";
+            line.textContent = lines[Math.min(lines.length - 1, Math.floor(p * lines.length))] + "…";
+            if (p < 1) requestAnimationFrame(step); else finish(pr, job);
+          })(t0);
+        });
+
+        function finish(pr, job) {
+          var card = document.createElement("article");
+          card.className = "x-result";
+          var media = document.createElement("div");
+          media.className = "x-result__media";
+          media.style.aspectRatio = ratio[job.aspect];
+          if (job.aspect === "9:16") { media.style.maxHeight = "560px"; media.style.marginInline = "auto"; media.style.width = "min(100%, 315px)"; }
+          var im = sources[jobs % sources.length].cloneNode();
+          im.alt = "Simulated preview for: " + job.text;
+          im.removeAttribute("loading");
+          if (!job.m.video || reduce) im.style.animationDuration = job.m.video ? "" : "24s";
+          media.appendChild(im);
+          media.insertAdjacentHTML("beforeend", '<span class="x-badge">Simulated preview</span><span class="x-dur">' + (job.m.video ? "0:" + pad(parseInt(job.dur, 10)) : "STILL") + "</span>");
+          card.appendChild(media);
+          var body = document.createElement("div");
+          body.className = "x-result__body";
+          body.innerHTML = '<p class="x-result__prompt"></p><div class="x-tags"></div><div class="x-result__acts"><span class="x-tip" data-tip="Connect a model to enable" tabindex="0"><button class="x-btn" type="button" disabled>Download</button></span><button class="x-btn" type="button" data-remix>Remix</button></div>';
+          $(".x-result__prompt", body).textContent = job.text;
+          var tags = [job.m.name, job.m.video ? job.dur : "Image", job.aspect, job.q, job.preset];
+          if (job.m.video) tags.push(job.sound ? "Sound on" : "Silent");
+          tags.forEach(function (t) { var s = document.createElement("span"); s.textContent = t; $(".x-tags", body).appendChild(s); });
+          $("[data-remix]", body).addEventListener("click", function () {
+            prompt.value = job.text; prompt.focus();
+            $("#creator").scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+          });
+          card.appendChild(body);
+          pr.replaceWith(card);
+          jobs++; busy = false;
+          $("#job-count").textContent = jobs + " hatched";
+          refresh();
+        }
+
+        /* hive: use this prompt */
+        $$("[data-use]").forEach(function (b) {
+          b.addEventListener("click", function () {
+            var parts = b.dataset.use.split("|");
+            model.value = parts[0];
+            if (parts[1] !== "still") duration.value = parts[1];
+            syncMode();
+            prompt.value = parts.slice(2).join("|");
+            refresh();
+            $("#hatchery").scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+            setTimeout(function () { prompt.focus({ preventScroll: true }); }, reduce ? 0 : 600);
+          });
+        });
+
+        /* pricing toggle */
+        function setBill(b) {
+          $$("[data-bill]").forEach(function (t) { t.setAttribute("aria-selected", t.dataset.bill === b ? "true" : "false"); });
+          $$(".x-price[data-annual]").forEach(function (el) {
+            var a = el.dataset.annual, m = el.dataset.monthly;
+            el.innerHTML = b === "annual" ? "<s>$" + m + "</s><strong>$" + a + "</strong><span>/mo</span>" : "<strong>$" + m + "</strong><span>/mo</span>";
+            el.nextElementSibling.textContent = b === "annual" ? "Billed yearly at $" + a * 12 + " · 60% off" : "Billed monthly";
+          });
+        }
+        $$("[data-bill]").forEach(function (t) { t.addEventListener("click", function () { setBill(t.dataset.bill); }); });
+        setBill("annual");
+
+        refresh();
+      })();
+    </script>
+  </body>
+</html>
