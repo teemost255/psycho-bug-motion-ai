@@ -131,6 +131,7 @@
     setTimeout(sync, 800);
     sync();
     wireRefs();
+    wireCreepy(box);
   }
 
   /* ---------- API helpers ---------- */
@@ -197,6 +198,36 @@
   }
 
   /* ---------- live generation ---------- */
+  /* ---------- Creepy mode toggle (on by default, remembered on this device) ---------- */
+  function creepy() {
+    try { return localStorage.getItem("pb-creepy") !== "off"; } catch (e) { return true; }
+  }
+  function wireCreepy(box) {
+    var row = document.createElement("label");
+    row.className = "pb-creepy";
+    row.innerHTML = '<input type="checkbox" id="pb-creepy" /><span class="pb-creepy__track"><i></i></span>' +
+      '<span class="pb-creepy__txt"><strong>Creepy mode</strong> <span id="pb-creepy-sub"></span></span>';
+    box.appendChild(row);
+    var cb = row.querySelector("input"), sub = row.querySelector("#pb-creepy-sub");
+    function paint() { sub.textContent = cb.checked ? "on — every result gets the dark psycho-horror look" : "off — results follow your prompt as written"; }
+    cb.checked = creepy(); paint();
+    cb.addEventListener("change", function () {
+      try { localStorage.setItem("pb-creepy", cb.checked ? "on" : "off"); } catch (e) {}
+      paint();
+    });
+    var css = document.createElement("style");
+    css.textContent =
+      ".pb-creepy{display:flex;align-items:center;gap:10px;margin-top:10px;cursor:pointer;font-size:12px;min-height:44px}" +
+      ".pb-creepy input{position:absolute;opacity:0;width:1px;height:1px}" +
+      ".pb-creepy__track{flex-shrink:0;width:40px;height:22px;border-radius:11px;background:rgba(255,255,255,.15);position:relative;transition:background .2s}" +
+      ".pb-creepy__track i{position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .2s}" +
+      ".pb-creepy input:checked+.pb-creepy__track{background:#C6FF00}" +
+      ".pb-creepy input:checked+.pb-creepy__track i{transform:translateX(18px);background:#0b0b0b}" +
+      ".pb-creepy input:focus-visible+.pb-creepy__track{outline:2px solid #C6FF00;outline-offset:2px}" +
+      ".pb-creepy__txt{opacity:.85}.pb-creepy__txt strong{opacity:1}";
+    document.head.appendChild(css);
+  }
+
   function presetName() {
     var el = $("#preset-name");
     return el ? el.textContent.trim() : "Larva";
@@ -204,7 +235,8 @@
 
   function buildPrompt(text) {
     var hint = PRESET_HINTS[presetName()] || "";
-    return text + (hint ? ", " + hint : "") + ", cinematic, dark psycho-horror mood, highly detailed";
+    return text + (hint ? ", " + hint : "") +
+      (creepy() ? ", cinematic, dark psycho-horror mood, highly detailed" : ", highly detailed");
   }
 
   function card(job) {
